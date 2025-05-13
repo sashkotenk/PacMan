@@ -106,8 +106,16 @@ class Game:
                     )
                     self.walls.append(Wall(wall_rect))
 
-
-
+    def spawn_coins(self):
+        self.coins.clear()
+        tile_size = 20
+        for y, row in enumerate(self.maze):
+            for x, char in enumerate(row):
+                if char == '.':
+                    scaled_x = x * tile_size * self.scale_x + tile_size // 2 * self.scale_x
+                    scaled_y = y * tile_size * self.scale_y + tile_size // 2 * self.scale_y
+                    coin_rect = pygame.Rect(scaled_x - 5, scaled_y - 5, 10, 10)
+                    self.coins.append(Coin(scaled_x, scaled_y))
 
     def run(self):
         # Головний цикл гри
