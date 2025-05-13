@@ -45,19 +45,19 @@ class Game:
         speed = base_speed if self.settings.difficulty == 1 else base_speed * 1.2
         self.ghosts.clear()
 
-        # Собираем все свободные клетки (где нет стены)
+        # Збираємо усі вільні клітини (де немає стін)
         valid_positions = []
         tile_size = 20
         for y, row in enumerate(self.maze):
             for x, char in enumerate(row):
-                if char == '.':  # свободная ячейка
+                if char == '.':  # вільна клітина
                     scaled_x = x * tile_size * self.scale_x
                     scaled_y = y * tile_size * self.scale_y
                     pos = pygame.Vector2(scaled_x + 10, scaled_y + 10)
                     if not any(w.rect.collidepoint(pos.x, pos.y) for w in self.walls):
                         valid_positions.append((scaled_x, scaled_y))
 
-        # Случайно выбираем позиции из допустимых
+        # Випадково обираємо місце
         random.shuffle(valid_positions)
         for i in range(min(count, len(valid_positions))):
             x, y = valid_positions[i]
