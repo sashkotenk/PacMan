@@ -5,7 +5,7 @@ from ghost import Ghost              # Клас привидів
 from menu import MainMenu            # Головне меню
 from menu import SubMenu             # Підменю (наприклад, пауза)
 from settings import Settings        # Клас для збереження налаштувань
-from wall import Wall                # Клас для відображення стін
+from walls import Wall                # Клас для відображення стін
 from coin import Coin                # Клас монет
 
 class Game:
@@ -39,53 +39,86 @@ class Game:
             self.handle_pause_selection
         )
 
+    def spawn_ghosts(self):
+        count = 2 if self.settings.difficulty == 1 else 3
+        base_speed = 1.5
+        speed = base_speed if self.settings.difficulty == 1 else base_speed * 1.2
+        self.ghosts.clear()
 
+        # Собираем все свободные клетки (где нет стены)
+        valid_positions = []
+        tile_size = 20
+        for y, row in enumerate(self.maze):
+            for x, char in enumerate(row):
+                if char == '.':  # свободная ячейка
+                    scaled_x = x * tile_size * self.scale_x
+                    scaled_y = y * tile_size * self.scale_y
+                    pos = pygame.Vector2(scaled_x + 10, scaled_y + 10)
+                    if not any(w.rect.collidepoint(pos.x, pos.y) for w in self.walls):
+                        valid_positions.append((scaled_x, scaled_y))
 
-        def create_maze(self):
-            self.walls.clear()
-            tile_size = 20
-            self.maze = [
-                "############################",
-                "#............##............#",
-                "#.####.#####.##.#####.####.#",
-                "#.####.#####.##.#####.####.#",
-                "#.####.#####.##.#####.####.#",
-                "#..........................#",
-                "#.####.##.########.##.####.#",
-                "#.####.##....##....##.####.#",
-                "#......##### ## #####......#",
-                "######.##### ## #####.######",
-                "     #.##          ##.#     ",
-                "     #.## ###  ### ##.#     ",
-                "######.## #      # ##.######",
-                "#     .   #      #   .     #",
-                "######.## #      # ##.######",
-                "     #.## ######## ##.#     ",
-                "     #.##          ##.#     ",
-                "######.## ######## ##.######",
-                "#............##............#",
-                "#.####.#####.##.#####.####.#",
-                "#.####.#####.##.#####.####.#",
-                "#...##................##...#",
-                "###.##.##.########.##.##.###",
-                "#......##....##....##......#",
-                "#.##########.##.##########.#",
-                "#..........................#",
-                "############################"
-            ]
-            for y, row in enumerate(self.maze):
-                for x, char in enumerate(row):
-                    if char == '#':
-                        wall_rect = (
-                            x * tile_size * self.scale_x,
-                            y * tile_size * self.scale_y,
-                            tile_size * self.scale_x,
-                            tile_size * self.scale_y
-                        )
-                        self.walls.append(Wall(wall_rect))
+        # Случайно выбираем позиции из допустимых
+        random.shuffle(valid_positions)
+        for i in range(min(count, len(valid_positions))):
+            x, y = valid_positions[i]
+            self.ghosts.append(Ghost(x, y, speed))
 
 
 
+    def create_maze(self):
+        self.walls.clear()
+        tile_size = 20
+        self.maze = [
+            "############################",
+            "#............##............#",
+            "#.####.#####.##.#####.####.#",
+            "#.####.#####.##.#####.####.#",
+            "#.####.#####.##.#####.####.#",
+            "#..........................#",
+            "#.####.##.########.##.####.#",
+            "#.####.##....##....##.####.#",
+            "#......##### ## #####......#",
+            "######.##### ## #####.######",
+            "     #.##          ##.#     ",
+            "     #.## ###  ### ##.#     ",
+            "######.## #      # ##.######",
+            "#     .   #      #   .     #",
+            "######.## #      # ##.######",
+            "     #.## ######## ##.#     ",
+            "     #.##          ##.#     ",
+            "######.## ######## ##.######",
+            "#............##............#",
+            "#.####.#####.##.#####.####.#",
+            "#.####.#####.##.#####.####.#",
+            "#...##................##...#",
+            "###.##.##.########.##.##.###",
+            "#......##....##....##......#",
+            "#.##########.##.##########.#",
+            "#..........................#",
+            "############################"
+        ]
+        for y, row in enumerate(self.maze):
+            for x, char in enumerate(row):
+                if char == '#':
+                    wall_rect = (
+                        x * tile_size * self.scale_x,
+                        y * tile_size * self.scale_y,
+                        tile_size * self.scale_x,
+                        tile_size * self.scale_y
+                    )
+                    self.walls.append(Wall(wall_rect))
+
+
+    def spawn_coins(self):
+        self.coins.clear()
+        tile_size = 20
+        for y, row in enumerate(self.maze):
+            for x, char in enumerate(row):
+                if char == '.':
+                    scaled_x = x * tile_size * self.scale_x + tile_size // 2 * self.scale_x
+                    scaled_y = y * tile_size * self.scale_y + tile_size // 2 * self.scale_y
+                    coin_rect = pygame.Rect(scaled_x - 5, scaled_y - 5, 10, 10)
+                    self.coins.append(Coin(scaled_x, scaled_y))
 
     def run(self):
         # Головний цикл гри
@@ -179,3 +212,107 @@ class Game:
                     self.game_over = False
                     self.score = 0
                     self.pacman = PacMan(scale_x=self.scale_x, scale_y=self.scale_y)
+
+    def start_new_game(self):
+        # Ініціалізація нової гри
+        self.scale_x = self.settings.resolution[0] / 640
+        self.scale_y = self.settings.resolution[1] / 480
+        self.create_maze()
+        self.spawn_coins()
+        self.spawn_ghosts()
+        self.pacman = PacMan(scale_x=self.scale_x, scale_y=self.scale_y)
+        self.in_menu = False
+        self.game_over = False
+        self.paused = False
+        self.score = 0
+    
+
+    def update_game(self):
+        # Оновлення стану гри
+        self.pacman.update(self.walls)
+
+        for ghost in self.ghosts:
+            ghost.update(self.pacman, self.walls, self.ghosts)
+
+        if all(coin.collected for coin in self.coins):
+            self.game_over = True
+            self.display_win_screen()
+
+        for coin in self.coins:
+            if not coin.collected and self.pacman.position.distance_to(coin.position) < 20:
+                if self.is_coin_reachable(coin):  # ✅ Перевірка доступності монети
+                    coin.collected = True
+                    self.score += 1
+
+        for ghost in self.ghosts:
+            if self.pacman.position.distance_to(ghost.position) < 20:
+                self.game_over = True
+
+
+    def draw_game(self):
+        # Вивід всіх об'єктів гри на екран
+        self.screen.fill(self.settings.bg_color)
+        for wall in self.walls:
+            wall.draw(self.screen)
+        for coin in self.coins:
+            coin.draw(self.screen)
+        self.pacman.draw(self.screen)
+        for ghost in self.ghosts:
+            ghost.draw(self.screen, (255, 0, 0))
+
+        font = pygame.font.SysFont(None, 36)
+        score_text = font.render(f"Coins: {self.score}", True, (255, 255, 255))
+        self.screen.blit(score_text, (10, 10))
+
+    def display_pause(self):
+        # Вивід тексту "Пауза"
+        font = pygame.font.SysFont(None, 72)
+        pause_text = font.render("Paused", True, (255, 255, 255))
+        self.screen.blit(pause_text, (220, 200))
+
+    def display_game_over(self):
+        # Вивід екрану поразки
+        self.screen.fill((0, 0, 0))
+        font = pygame.font.SysFont(None, 72)
+        text = font.render("Game Over", True, (255, 0, 0))
+        self.screen.blit(text, (180, 180))
+
+        small_font = pygame.font.SysFont(None, 48)
+        menu_text = small_font.render("Press ENTER to return to Menu", True, (255, 255, 255))
+        self.screen.blit(menu_text, (100, 300))
+
+    def display_win_screen(self):
+        # Вивід екрану перемоги
+        self.screen.fill((0, 100, 0))
+        font = pygame.font.SysFont(None, 72)
+        text = font.render("You Won!", True, (255, 255, 0))
+        self.screen.blit(text, (200, 180))
+        pygame.display.flip()
+        pygame.time.delay(2000)
+        self.in_menu = True
+        self.game_over = False
+
+    def change_menu(self, new_menu):
+        # Зміна активного меню
+        self.current_menu = new_menu
+
+    def is_coin_reachable(self, coin):
+        # Перевірка, чи монету можна досягти з поточної позиції Пакмена (BFS)
+        visited = set()
+        queue = [self.pacman.position]
+
+        def point_in_wall(pos):
+            return any(w.rect.collidepoint(pos.x, pos.y) for w in self.walls)
+
+        while queue:
+            current = queue.pop(0)
+            if current.distance_to(coin.position) < 15:
+                return True
+
+            for dx, dy in [(-20, 0), (20, 0), (0, -20), (0, 20)]:
+                neighbor = pygame.Vector2(current.x + dx, current.y + dy)
+                if (neighbor.x, neighbor.y) not in visited and not point_in_wall(neighbor):
+                    visited.add((neighbor.x, neighbor.y))
+                    queue.append(neighbor)
+
+        return False
