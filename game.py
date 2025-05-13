@@ -85,3 +85,97 @@ class Game:
                         self.walls.append(Wall(wall_rect))
 
 
+
+
+    def run(self):
+        # Головний цикл гри
+        while self.running:
+            if self.in_menu:
+                self.handle_menu_events()
+                self.current_menu.display_menu()
+            elif self.game_over:
+                self.handle_game_over_events()
+                self.display_game_over()
+            elif self.paused:
+                self.handle_pause_events()
+                self.pause_menu.display_menu()
+            else:
+                self.handle_game_events()
+                self.update_game()
+                self.draw_game()
+
+            pygame.display.flip()      # Оновлення екрану
+            self.clock.tick(60)        # Затримка для 60 FPS
+
+    def handle_menu_events(self):
+        # Обробка подій в меню
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                self.running = False
+            elif event.type == pygame.KEYDOWN:
+                if isinstance(self.current_menu, SubMenu):
+                    if event.key == pygame.K_UP:
+                        self.current_menu.navigate(-1)
+                    elif event.key == pygame.K_DOWN:
+                        self.current_menu.navigate(1)
+                    elif event.key == pygame.K_RETURN:
+                        self.current_menu.select_option()
+                    elif event.key == pygame.K_ESCAPE:
+                        self.current_menu.callback = None
+                        self.current_menu = self.menu
+                elif isinstance(self.current_menu, MainMenu):
+                    if event.key == pygame.K_UP:
+                        self.menu.navigate(-1)
+                    elif event.key == pygame.K_DOWN:
+                        self.menu.navigate(1)
+                    elif event.key == pygame.K_RETURN:
+                        result = self.menu.select_option()
+                        if result == "start":
+                            self.start_new_game()
+                        elif result == "exit":
+                            self.running = False
+
+    def handle_game_events(self):
+        # Обробка подій під час гри
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                self.running = False
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    self.paused = True
+                else:
+                    self.pacman.handle_event(event)
+
+    def handle_pause_events(self):
+        # Обробка подій у меню паузи
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                self.running = False
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_UP:
+                    self.pause_menu.navigate(-1)
+                elif event.key == pygame.K_DOWN:
+                    self.pause_menu.navigate(1)
+                elif event.key == pygame.K_RETURN:
+                    self.pause_menu.select_option()
+
+    def handle_pause_selection(self, option):
+        # Обробка вибору пункту в меню паузи
+        if option == "Resume":
+            self.paused = False
+        elif option == "Main Menu":
+            self.in_menu = True
+            self.paused = False
+            self.current_menu = self.menu
+
+    def handle_game_over_events(self):
+        # Обробка подій після завершення гри
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                self.running = False
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_RETURN:
+                    self.in_menu = True
+                    self.game_over = False
+                    self.score = 0
+                    self.pacman = PacMan(scale_x=self.scale_x, scale_y=self.scale_y)
