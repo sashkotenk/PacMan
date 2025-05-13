@@ -39,50 +39,72 @@ class Game:
             self.handle_pause_selection
         )
 
+    def spawn_ghosts(self):
+        count = 2 if self.settings.difficulty == 1 else 3
+        base_speed = 1.5
+        speed = base_speed if self.settings.difficulty == 1 else base_speed * 1.2
+        self.ghosts.clear()
 
+        # збираємо всі вільні клітини, де нема стіни
+        valid_positions = []
+        tile_size = 20
+        for y, row in enumerate(self.maze):
+            for x, char in enumerate(row):
+                if char == '.':  # вільно
+                    scaled_x = x * tile_size * self.scale_x
+                    scaled_y = y * tile_size * self.scale_y
+                    pos = pygame.Vector2(scaled_x + 10, scaled_y + 10)
+                    if not any(w.rect.collidepoint(pos.x, pos.y) for w in self.walls):
+                        valid_positions.append((scaled_x, scaled_y))
 
-        def create_maze(self):
-            self.walls.clear()
-            tile_size = 20
-            self.maze = [
-                "############################",
-                "#............##............#",
-                "#.####.#####.##.#####.####.#",
-                "#.####.#####.##.#####.####.#",
-                "#.####.#####.##.#####.####.#",
-                "#..........................#",
-                "#.####.##.########.##.####.#",
-                "#.####.##....##....##.####.#",
-                "#......##### ## #####......#",
-                "######.##### ## #####.######",
-                "     #.##          ##.#     ",
-                "     #.## ###  ### ##.#     ",
-                "######.## #      # ##.######",
-                "#     .   #      #   .     #",
-                "######.## #      # ##.######",
-                "     #.## ######## ##.#     ",
-                "     #.##          ##.#     ",
-                "######.## ######## ##.######",
-                "#............##............#",
-                "#.####.#####.##.#####.####.#",
-                "#.####.#####.##.#####.####.#",
-                "#...##................##...#",
-                "###.##.##.########.##.##.###",
-                "#......##....##....##......#",
-                "#.##########.##.##########.#",
-                "#..........................#",
-                "############################"
-            ]
-            for y, row in enumerate(self.maze):
-                for x, char in enumerate(row):
-                    if char == '#':
-                        wall_rect = (
-                            x * tile_size * self.scale_x,
-                            y * tile_size * self.scale_y,
-                            tile_size * self.scale_x,
-                            tile_size * self.scale_y
-                        )
-                        self.walls.append(Wall(wall_rect))
+        # випадково вибираємо позиції привидів
+        random.shuffle(valid_positions)
+        for i in range(min(count, len(valid_positions))):
+            x, y = valid_positions[i]
+            self.ghosts.append(Ghost(x, y, speed))   
+
+    def create_maze(self):
+        self.walls.clear()
+        tile_size = 20
+        self.maze = [
+            "############################",
+            "#............##............#",
+            "#.####.#####.##.#####.####.#",
+            "#.####.#####.##.#####.####.#",
+            "#.####.#####.##.#####.####.#",
+            "#..........................#",
+            "#.####.##.########.##.####.#",
+            "#.####.##....##....##.####.#",
+            "#......##### ## #####......#",
+            "######.##### ## #####.######",
+            "     #.##          ##.#     ",
+            "     #.## ###  ### ##.#     ",
+            "######.## #      # ##.######",
+            "#     .   #      #   .     #",
+            "######.## #      # ##.######",
+            "     #.## ######## ##.#     ",
+            "     #.##          ##.#     ",
+            "######.## ######## ##.######",
+            "#............##............#",
+            "#.####.#####.##.#####.####.#",
+            "#.####.#####.##.#####.####.#",
+            "#...##................##...#",
+            "###.##.##.########.##.##.###",
+            "#......##....##....##......#",
+            "#.##########.##.##########.#",
+            "#..........................#",
+            "############################"
+        ]
+        for y, row in enumerate(self.maze):
+            for x, char in enumerate(row):
+                if char == '#':
+                    wall_rect = (
+                        x * tile_size * self.scale_x,
+                        y * tile_size * self.scale_y,
+                        tile_size * self.scale_x,
+                        tile_size * self.scale_y
+                    )
+                    self.walls.append(Wall(wall_rect))
 
 
 
