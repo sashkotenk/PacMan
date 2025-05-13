@@ -10,4 +10,39 @@ class PacMan(Character):
         super().__init__(start_x, start_y, speed=1.5)
         self.direction = pygame.Vector2(0, 0)
 
+    def update(self, walls):
+        keys = pygame.key.get_pressed()
+        self.direction = pygame.Vector2(0, 0)
+        if keys[pygame.K_LEFT]:
+            self.direction.x = -1
+        if keys[pygame.K_RIGHT]:
+            self.direction.x = 1
+        if keys[pygame.K_UP]:
+            self.direction.y = -1
+        if keys[pygame.K_DOWN]:
+            self.direction.y = 1
+
+        if self.direction.length_squared() > 0:
+            self.direction = self.direction.normalize()
+
+
+        self.position.x += self.direction.x * self.speed
+        if any(wall.rect.collidepoint(self.position) for wall in walls):
+            self.position.x -= self.direction.x * self.speed
+
+
+        self.position.y += self.direction.y * self.speed
+        if any(wall.rect.collidepoint(self.position) for wall in walls):
+            self.position.y -= self.direction.y * self.speed
+
+    def handle_event(self, event):
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_LEFT:
+                self.direction = pygame.Vector2(-1, 0)
+            elif event.key == pygame.K_RIGHT:
+                self.direction = pygame.Vector2(1, 0)
+            elif event.key == pygame.K_UP:
+                self.direction = pygame.Vector2(0, -1)
+            elif event.key == pygame.K_DOWN:
+                self.direction = pygame.Vector2(0, 1)
 
