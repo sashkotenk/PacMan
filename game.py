@@ -244,3 +244,17 @@ class Game:
         for ghost in self.ghosts:
             if self.pacman.position.distance_to(ghost.position) < 20:
                 self.game_over = True
+
+    def draw_game(self): # вивід об'єктів гри
+        self.screen.fill(self.settings.bg_color)
+        for wall in self.walls:
+            wall.draw(self.screen)
+        for coin in self.coins:
+            coin.draw(self.screen)
+        self.pacman.draw(self.screen)
+        for ghost in self.ghosts:
+            ghost.draw(self.screen, (255, 0, 0))
+
+        font = pygame.font.SysFont(None, 36)
+        score_text = font.render(f"Coins: {self.score}", True, (255, 255, 255))
+        self.screen.blit(score_text, (10, 10))
