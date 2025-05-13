@@ -209,3 +209,38 @@ class Game:
                     self.game_over = False
                     self.score = 0
                     self.pacman = PacMan(scale_x=self.scale_x, scale_y=self.scale_y)
+
+    def start_new_game(self): # ініціалізація нової гри
+        
+        self.scale_x = self.settings.resolution[0] / 640
+        self.scale_y = self.settings.resolution[1] / 480
+        self.create_maze()
+        self.spawn_coins()
+        self.spawn_ghosts()
+        self.pacman = PacMan(scale_x=self.scale_x, scale_y=self.scale_y)
+        self.in_menu = False
+        self.game_over = False
+        self.paused = False
+        self.score = 0
+    
+
+    def update_game(self): # оновлення стану гри
+        
+        self.pacman.update(self.walls)
+
+        for ghost in self.ghosts:
+            ghost.update(self.pacman, self.walls, self.ghosts)
+
+        if all(coin.collected for coin in self.coins):
+            self.game_over = True
+            self.display_win_screen()
+
+        for coin in self.coins:
+            if not coin.collected and self.pacman.position.distance_to(coin.position) < 20:
+                if self.is_coin_reachable(coin):  # перевірка доступності монети
+                    coin.collected = True
+                    self.score += 1
+
+        for ghost in self.ghosts:
+            if self.pacman.position.distance_to(ghost.position) < 20:
+                self.game_over = True
