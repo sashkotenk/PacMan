@@ -283,3 +283,26 @@ class Game:
         pygame.time.delay(2000)
         self.in_menu = True
         self.game_over = False
+
+    def change_menu(self, new_menu): # зміна активного меню
+        self.current_menu = new_menu
+
+    def is_coin_reachable(self, coin): # перевірка чи монету можна досягти з поточної позиції пакмана
+        visited = set()
+        queue = [self.pacman.position]
+
+        def point_in_wall(pos):
+            return any(w.rect.collidepoint(pos.x, pos.y) for w in self.walls)
+
+        while queue:
+            current = queue.pop(0)
+            if current.distance_to(coin.position) < 15:
+                return True
+
+            for dx, dy in [(-20, 0), (20, 0), (0, -20), (0, 20)]:
+                neighbor = pygame.Vector2(current.x + dx, current.y + dy)
+                if (neighbor.x, neighbor.y) not in visited and not point_in_wall(neighbor):
+                    visited.add((neighbor.x, neighbor.y))
+                    queue.append(neighbor)
+
+        return False
