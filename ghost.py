@@ -57,3 +57,23 @@ class Ghost(Character):
         path.reverse()
         # перетворення шляху з координат сітки в пікселі
         self.path = [pygame.Vector2(x * 20 + 10, y * 20 + 10) for x, y in path]
+
+    def update(self, pacman, walls, other_ghosts):
+        self.path_update_timer += 1
+        if self.path_update_timer >= 15:
+            self.find_path(pacman.position, walls, other_ghosts)
+            self.path_update_timer = 0
+
+        if self.path:
+            next_cell = self.path[0]
+            # продовження руху
+            if self.position.distance_to(next_cell) < 5:
+                self.position = next_cell
+                self.path.pop(0)
+            elif self.path:
+                direction = (self.path[0] - self.position).normalize()
+                if abs(direction.x) > abs(direction.y):
+                    direction.y = 0
+                else:
+                    direction.x = 0
+                self.position += direction * self.speed
