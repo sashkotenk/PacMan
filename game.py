@@ -258,3 +258,28 @@ class Game:
         font = pygame.font.SysFont(None, 36)
         score_text = font.render(f"Coins: {self.score}", True, (255, 255, 255))
         self.screen.blit(score_text, (10, 10))
+
+    def display_pause(self): # вивід тексту "пауза"
+        font = pygame.font.SysFont(None, 72)
+        pause_text = font.render("Paused", True, (255, 255, 255))
+        self.screen.blit(pause_text, (220, 200))
+
+    def display_game_over(self): # вивід екрану поразки
+        self.screen.fill((0, 0, 0))
+        font = pygame.font.SysFont(None, 72)
+        text = font.render("Game Over", True, (255, 0, 0))
+        self.screen.blit(text, (180, 180))
+
+        small_font = pygame.font.SysFont(None, 48)
+        menu_text = small_font.render("Press ENTER to return to Menu", True, (255, 255, 255))
+        self.screen.blit(menu_text, (100, 300))
+
+    def display_win_screen(self): # вивід екрану перемоги
+        self.screen.fill((0, 100, 0))
+        font = pygame.font.SysFont(None, 72)
+        text = font.render("You Won!", True, (255, 255, 0))
+        self.screen.blit(text, (200, 180))
+        pygame.display.flip()
+        pygame.time.delay(2000)
+        self.in_menu = True
+        self.game_over = False
