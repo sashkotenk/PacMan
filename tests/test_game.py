@@ -32,6 +32,7 @@ def pacman():
 def ghost():
     return Ghost(40, 40)
 
+# створює базовий Character на позиції (10,10) з швидкістю 2
 @pytest.fixture
 def character():
     return Character(10, 10, speed=2)
