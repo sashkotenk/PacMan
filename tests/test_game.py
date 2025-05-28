@@ -83,6 +83,7 @@ def test_pacman_update_keys(monkeypatch, pacman):
     assert pacman.direction == pygame.Vector2(1, 0)
 
 # ----------- GHOST ------------------
+# тест базового пошуку шляху у Ghost
 @pytest.mark.ghost
 def test_ghost_pathfinding_basic(ghost):
     target = Character(80, 40)
