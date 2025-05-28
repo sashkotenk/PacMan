@@ -97,6 +97,7 @@ def test_ghost_pathfinding_basic(ghost):
 @pytest.mark.coin
 def test_coin_initial_state():
     coin = Coin(100, 100)
+    # позиція має відповідати аргументам конструктора
     assert coin.position == pygame.Vector2(100, 100)
     assert not coin.collected
 
