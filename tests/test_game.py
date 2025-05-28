@@ -47,6 +47,7 @@ def character():
     (pygame.Vector2(0, 1), pygame.Vector2(10, 12)),
 ])
 def test_character_movement_param(character, direction, expected):
+    # встановлюємо напрямок і викликаємо рух
     character.direction = direction
     character.move()
     assert character.position == expected
