@@ -22,6 +22,7 @@ from walls import Wall
 
 
 # ----------- FIXTURES --------------
+# заготовки об’єктів, які використовуються в тестах
 @pytest.fixture
 def pacman():
     return PacMan()
