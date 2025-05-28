@@ -37,6 +37,7 @@ def character():
     return Character(10, 10, speed=2)
 
 # ----------- PARAMETRIZED TESTS --------------
+# параметризовані тести перевіряють рух Character у 4 напрямках
 @pytest.mark.character
 @pytest.mark.parametrize("direction,expected", [
     (pygame.Vector2(1, 0), pygame.Vector2(12, 10)),
